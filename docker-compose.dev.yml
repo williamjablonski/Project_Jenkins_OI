@@ -1,0 +1,70 @@
+version: '3.1'
+services:
+  app:
+      build:
+          context: ./appJenkins
+      volumes:
+          - ./appJenkins/:/usr/src/app
+          - /usr/src/app/node_modules/
+      links:
+      - api
+      depends_on:
+      - api
+      ports:
+        - "3000:3000"
+        - "35729:35729"
+      environment:
+        - CHOKIDAR_USEPOLLING=true
+      command: npm start
+      networks:
+        jenkins-compose-network:
+  api:
+      build:
+          context: ./apiJenkins
+      volumes:
+      - ./apiJenkins/:/usr/src/app
+      - /usr/src/app/node_modules/
+      links:
+          - mongo
+      environment:
+      - MONGO_URI="mongodb://root:QuCl6uREgSG3@mongo:27017/jenkins_db?authSource=admin
+      ports:
+      - "3005:3005"
+      command: npm start
+      networks:
+        jenkins-compose-network:
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: Tim@123456
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD:  QuCl6uREgSG3
+    links:
+      - mongo
+    networks:
+      jenkins-compose-network:
+
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: QuCl6uREgSG3
+    ports:
+      - "27017:27017"
+    volumes:
+      - jenkinsData:/data/db
+    networks:
+      jenkins-compose-network:
+
+      
+networks:
+    jenkins-compose-network:
+      driver: bridge
+
+volumes:
+  jenkinsData:

@@ -1,0 +1,146 @@
+def number = 1;
+def vCenarios = ["{{nameJob}}"];
+pipeline {
+    agent {
+        node {
+            {{OSLabel}}
+        }
+    }
+
+    environment{
+        l_dirExec = "/home/jenkins/workspace/Teste_V";
+        l_dirSuit = "${l_dirExec}";
+        l_name_evidencia = "${BUILD_NUMBER}_${JOB_NAME}".replace(" ", "_");
+        l_dirpath = "EVIDENCIAS/${l_name_evidencia}";
+        l_dirLog = "${l_dirpath}/log";
+        l_dirpathEv = "${l_dirExec}/EVIDENCIAS";
+        l_dirpathLog = "${l_dirExec}/${l_dirLog}";
+        l_dirpathEvidencia = "${l_dirExec}/${l_dirpath}";
+        w_dirExec="C:\\jenkins\\workspace\\Teste_V";
+        w_dirSuit = "${w_dirExec}";
+        w_name_evidencia = "${BUILD_NUMBER}_${JOB_NAME}".replace(" ", "_");
+        w_dirpath = "EVIDENCIAS\\${name_evidencia}";
+        w_dirLog = "${w_dirpath}\\log";
+        w_dirpathEv = "${w_dirExec}\\EVIDENCIAS";
+        w_dirpathLog = "${w_dirExec}\\${w_dirLog}";
+        w_dirpathEvidencia = "${w_dirExec}\\${w_dirpath}";
+        dirExec = "${env.NODE_NAME == 'vmLinux' ? env.l_dirExec : env.w_dirExec}";
+        WORKSPACE="${env.NODE_NAME == 'vmLinux' ? env.l_dirExec : env.w_dirExec}";
+        dirSuit = "${env.NODE_NAME == 'vmLinux' ? env.l_dirSuit : env.w_dirSuit}";
+        name_evidencia = "${env.NODE_NAME == 'vmLinux' ? env.l_name_evidencia : env.w_name_evidencia}";
+        dirpath = "${env.NODE_NAME == 'vmLinux' ? env.l_dirpath : env.w_dirpath}";
+        dirLog = "${env.NODE_NAME == 'vmLinux' ? env.l_dirLog : env.w_dirLog}";
+        dirpathEv = "${env.NODE_NAME == 'vmLinux' ? env.l_dirpathEv : env.w_dirpathEv}";
+        dirpathLog = "${env.NODE_NAME == 'vmLinux' ? env.l_dirpathLog : env.w_dirpathLog}";
+        dirpathEvidencia = "${env.NODE_NAME == 'vmLinux' ? env.l_dirpathEvidencia : env.w_dirpathEvidencia}";
+    }
+    stages {
+        stage('{{jobStage}}') {
+            steps {
+                dir(dirExec){
+                    script {
+                        for(int i=0; i < vCenarios.size(); i++) {
+                            stage(vCenarios[i])  {
+                                def vCenario_Name = vCenarios[i].replace(" ", "_")
+                                echo "NOME: $vCenario_Name";
+                                catchError(stageResult:'FAILURE') {
+                                    if (NODE_NAME != "vmLinux") {
+                                        bat """
+                                            robot {{windowsScript}}  --variablefile variables.py -d '${dirpathLog}' --output ${i}.xml --extension robot
+                                        """
+                                    }
+                                     else{
+                                         sh """
+                                           /home/automation/scripts/start_automation2.sh -v DOCKER: {{linuxScript}} --outputdir /opt/automation/results --variablefile /opt/automation/suits/variables.py --extension robot --extension robot /opt/automation/suits' '${dirExec}' '${name_evidencia}'
+                                        """
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    stage('Gerando Relatorio') {
+            steps {
+                script {
+                    dir(dirpathLog){
+                        catchError(stageResult: 'SUCCESS') {
+                            if (NODE_NAME != "vmLinux") {
+                                                bat """
+                                    rebot --name RebotCombined *.xml
+                                """
+                            }
+                            else{
+                                sh """
+                                    rebot --name RebotCombined *.xml
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            publishTestResults();
+            Evidenciar();
+        }
+    }
+}
+void Evidenciar() {
+    if (fileExists(dirpathEvidencia)) {
+        echo 'Yes';
+        script{
+            dir("${dirpathLog}@tmp"){
+                deleteDir();
+            }
+
+            dir("${dirpathEvidencia}_ZIP"){
+                echo "dir0";
+                if (NODE_NAME != "vmLinux") {
+                    bat """
+                        python -c 'import shutil;shutil.make_archive('Evidencia_${name_evidencia}','zip',root_dir='${dirpathEv}', base_dir='${name_evidencia}')'
+                    """
+                };
+                else{
+                    sh """
+                        python -c 'import shutil;shutil.make_archive('Evidencia_${name_evidencia}','zip',root_dir='${dirpathEv}', base_dir='${name_evidencia}')'
+                    """
+                };
+                archiveArtifacts artifacts: "Evidencia_${name_evidencia}.zip"
+
+                deleteDir();
+            };
+            dir("${dirpathEvidencia}_ZIP@tmp"){
+                echo "dir1";
+                deleteDir();
+            };
+            dir("${dirpathEvidencia}@tmp"){
+                 echo "dir3";
+                deleteDir();
+            };
+            dir("${dirpathEvidencia}"){
+                echo "dir2";
+                deleteDir();
+            };
+        };
+
+    } else {
+        echo 'No evidencia';
+    };
+};
+
+void publishTestResults() {
+    step([
+            $class           : 'hudson.plugins.robot.RobotPublisher',
+            outputPath       : "${dirpathLog}",
+            passThreshold    : 100,
+            unstableThreshold: 90,
+            otherFiles       : '**/*.png',
+            reportFileName   : 'report.html',
+            logFileName      : 'log.html',
+            outputFileName   : '*.xml'
+    ]);
+}

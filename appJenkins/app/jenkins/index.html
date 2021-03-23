@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html ng-app="primeiraApp">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<title> {{ consts.appName }} - {{ consts.version }}</title>
+	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+	<link href="../assets/css/deps.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+
+</head>
+<body >
+
+
+	<div class="image-container set-full-height" style="background-image: url('../assets/img/automation.jpg')" >
+		
+		<div class="container" ng-controller="JobCtrl as jobCtrl">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2">
+					
+					<div class="wizard-container" style="padding-top: 30px;">
+						<div class="card wizard-card" data-color="blue" id="wizardProfile">
+							<form>
+											
+								<div class="wizard-header">
+									<h3 class="wizard-title animate__animated animate__rubberBand">
+									   Criação de Job Jenkins
+									</h3>
+									<h5 >Automação de Jobs - IBM</h5>
+								</div>
+								<div class="wizard-navigation">
+									<ul>
+										<li><a href="#project" data-toggle="tab">Projeto</a></li>
+										<li><a href="#parameters" data-toggle="tab">Parâmetros</a></li>
+										<li><a href="#review" data-toggle="tab">Resumo</a></li>
+									</ul>
+								</div>
+	
+								<div class="tab-content">
+									<div class="tab-pane" id="project">
+									  <div class="row">
+											<h4 class="info-text"> Preencha com as informações do Job</h4>
+											<div class="col-sm-4 col-sm-offset-1">
+												<div class="picture-container">
+													<div class="picture">
+														<img src="../assets/img/jenkins.png" class="picture-src" id="wizardPicturePreview" title=""/>
+													</div>
+												</div>
+											</div>
+											<div class="col-sm-6">
+												<div class="input-group">
+													<span class="input-group-addon">
+														<i class="material-icons">work</i>
+													</span>
+													<div class="form-group label-floating">
+													  <label class="control-label">Nome do Job <small>(obrigatório)</small></label>
+													  <input name="jobName" ng-model="jobCtrl.job.jobName" type="text" class="form-control">
+													</div>
+												</div>
+	
+												<div class="input-group">
+													<span class="input-group-addon">
+														<i class="material-icons">description</i>
+													</span>
+													<div class="form-group label-floating">
+													  <label class="control-label">Descrição</label>
+													  <input name="description" ng-model="jobCtrl.job.description" type="text" class="form-control">
+													</div>
+												</div>
+
+												<div class="input-group">
+													<span class="input-group-addon">
+														<i class="material-icons">tag</i>
+													</span>
+													<div class="form-group label-floating">
+														<label class="control-label">Tag de execução do Job <small>(obrigatório)</small></label>
+														<input name="tagName" ng-model="jobCtrl.job.tagName" type="text" class="form-control">
+													  </div>
+												</div>
+											</div>
+										
+										</div>
+									</div>
+									<div class="tab-pane " id="parameters">
+										<h4 class="info-text"> Seu job é parametrizado? </h4>
+										<div class="row">
+											<div id="options" class="col-sm-10 col-sm-offset-1" style="position: absolute;">
+												<div class="col-md-6" ng-click="jobCtrl.checkYes()">
+													<div class="choice"  data-toggle="wizard-radio"  rel="tooltip" title="Preencher os campos com os pamâmetros" name="mhb_type">
+													  <label>
+													  <div class="icon">
+														 <i class="material-icons">check</i>
+													  </div>
+													  </label>
+													  <h6>Sim!</h6>
+													</div>
+												  </div>
+												<div class="col-sm-6">
+													<div class="choice btn-next" data-toggle="wizard-radio" rel="tooltip" title="Pular para o resumo" name="mhb_type">
+													  <label>
+													  <div class="icon">
+														 <i class="material-icons">close</i>
+													  </div>
+													  </label>
+													  <h6>Não</h6>
+													</div>
+												  </div>
+											</div>
+	
+											<div id="param" class="col-sm-12" style="display: none; ">
+											
+												<table class="table col-md-12" id="tblAddRow">
+													<tbody>
+														<tr ng-repeat="parametro in jobCtrl.job.parametros">
+															<td>
+																<div class="form-group label-floating">
+																	<label class="control-label">Parâmetro</label>
+																	<input name="parametro[]" onkeydown="upperCaseF(this)" ng-model="parametro.val" type="text" class="form-control">
+																  </div>
+															</td>
+															<td>
+																<div class="form-group label-floating">
+																	<label class="control-label">Tipo</label>
+																	<select id="tipo" name="tipo[]" class="form-control" ng-model="parametro.tipo" ng-change="jobCtrl.viewDefault($index)">
+																		<option disabled="" selected=""></option>
+																		<option value="string"> String </option>
+																		<option value="escolha"> Escolha </option>
+																	</select>
+																</div>
+															</td>
+															<td class="col-md-3">
+																<button id="btnAddNewRow" type="button" ng-click="jobCtrl.addNewParametro($index)" class="btn btn-success">
+																	<div class="icon">
+																		<i class="material-icons">add</i>
+																	 </div>
+																</button>
+																<button id="btnDelLastRow" type="button" ng-click="jobCtrl.deleteParametro($index)" class="btn btn-danger">
+																	<div class="icon">
+																		<i class="material-icons">close</i>
+																	 </div>
+																</button>
+															</td>
+														</tr>
+	
+													</tbody>
+												</table>
+											</div>
+	
+										</div>
+										<div class="modal fade" id="defaultModel" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+											<div class="modal-dialog modal-dialog-centered" role="document">
+											  <div class="modal-content">
+												<div class="modal-header">
+												  <h5 class="modal-title" id="modalCenterTitle">{{jobCtrl.jobSelected.val}}</h5>
+												  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+													<span aria-hidden="true">&times;</span>
+												  </button>
+												</div>
+												<div class="modal-body" ng-if="jobCtrl.jobSelected.tipo=='string'">
+													<div class="form-group label-floating">
+														<label class="control-label">Default</label>
+														<input ng-model="jobCtrl.jobSelected.def" type="text" class="form-control">
+													</div>
+													<div class="form-group label-floating">
+														<label class="control-label">Observação</label>
+														<input ng-model="jobCtrl.jobSelected.obs" type="text" class="form-control">
+													</div>
+												</div>
+												<div class="modal-body" ng-if="jobCtrl.jobSelected.tipo=='escolha'">
+													<div class="form-group label-floating">
+														<label class="control-label">Default (Separe os valores por virgula (,) ** UAT1, UAT2, UAT3)</label>
+														<input ng-model="jobCtrl.jobSelected.def" class="form-control" type="text" />
+													</div>
+													<div class="form-group label-floating">
+														<label class="control-label">Observação</label>
+														<input ng-model="jobCtrl.jobSelected.obs" type="text" class="form-control">
+													</div>
+												</div>
+												<div class="modal-footer">
+												  <button type="button" class="btn btn-primary" ng-click="jobCtrl.confirmDefaults()">OK!</button>
+												</div>
+											  </div>
+											</div>
+										  </div>
+	
+									</div>
+									<div class="tab-pane" id="review">
+										<div class="row">
+											<div class="col-sm-12">
+												<h4 class="info-text">Resumo do Job </h4>
+											</div>
+											<div class="col-md-6">
+												<div class="panel panel-default">
+													<div class="panel-body animate__animated animate__flipInX">
+													  <b><h3>{{jobCtrl.job.jobName}}</h3></b>
+													  <p>{{jobCtrl.job.description}}</p>
+														<h4><b># {{jobCtrl.job.tagName}}</b></h4>
+												
+													  <div class="panel-group" id="accordion" ng-repeat="parametro in jobCtrl.job.parametros">
+														<div class="panel panel-primary">
+														  <div class="panel-heading">
+															<h4 class="panel-title">
+															  <!-- <a class="colpsible-panel" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"> -->
+																  <b>{{parametro.val}} - <i>{{parametro.tipo}}</i></b>
+															  <!-- </a> -->
+															</h4>
+														  </div>
+														  <div id="collapseOne" ng-if="parametro.def" class="panel-collapse collapse in">
+															<div class="panel-body" >
+																<p class="mb-1">{{parametro.def}}</small> 
+															</div>
+														  </div>
+														</div>
+
+													  </div>
+
+													</div>
+												  </div>
+											</div>
+											<div class="col-md-6">
+												<div class="panel panel-default">
+													<div class="panel-body">
+														<div class="col-md-12 text-center animate__animated animate__flipInX">
+															<div class="col-md-12">
+																<label class="form-check-label" for="rec"><h4>Sistema Operacional</h4></label>
+															</div>
+															<div class="col-md-6">
+																<img src="../assets/img/linux.png" class="img-thumbnail" style="height: 70px; border: 0;" alt="Linux">
+																<div class="switch__container">
+																	<input id="linux" class="switch switch--shadow" checked ng-model="jobCtrl.job.os.linux" type="checkbox">
+																	<label for="linux"></label>
+																  </div>
+															</div>
+														<div class="col-md-6 text-center">
+																<img src="../assets/img/windows.png" class="img-thumbnail" style="height: 70px; border: 0;" alt="Windows">
+																<div class="switch__container">
+																	<input id="windows" class="switch switch--shadow" checked ng-model="jobCtrl.job.os.windows" type="checkbox">
+																	<label for="windows"></label>
+																  </div>
+														</div>
+														</div>
+														
+														<div class="col-md-12 panel panel-primary text-center animate__animated animate__flipInX">
+															<div class="col-md-12">
+																<label class="form-check-label" for="rec"><h4>Gravar Evidência?</h4></label>
+															</div>
+															<div class="col-md-6 text-center">
+																<img src="../assets/img/rec.png" class="img-thumbnail" style="height: 55px; border: 0;" alt="Rec">
+															</div>
+																<div class="col-md-6 text-center">
+																<div class="switch__container" style="margin-top: 10px;">
+																	<input id="rec" class="switch switch--shadow" checked ng-model="jobCtrl.job.rec" type="checkbox">
+																	<label for="rec"></label>
+																  </div>
+															</div>
+														</div>
+													</div>
+												  </div>
+											</div>
+									
+										</div>
+									</div>
+								</div>
+								<div class="wizard-footer">
+									<div class="pull-right">
+										<input type='button' class='btn btn-next btn-fill btn-success btn-wd' name='next' value='Próximo' />
+										<input type='button' class='btn btn-finish btn-fill btn-success btn-wd' name='finish' value='Finalizar' data-toggle="modal" data-target="#confirmModal" />
+									</div>
+	
+									<div class="pull-left">
+										<input type='button' class='btn btn-previous btn-fill btn-default btn-wd' name='previous' value='Voltar' />
+									</div>
+									<div class="clearfix"></div>
+								</div>
+							</form>
+							<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+								<div class="modal-dialog modal-dialog-centered" role="document">
+								  <div class="modal-content">
+									<div class="modal-header">
+									  <h5 class="modal-title" id="exampleModalLongTitle">Criando novo Job</h5>
+									  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									  </button>
+									</div>
+									<div class="modal-body">
+									  Deseja criar este Job no Jenkins IBM?
+									</div>
+									<div class="modal-footer">
+									  <!-- <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button> -->
+									  <button type="button" class="btn btn-success" ng-click="jobCtrl.createJob()">Sim, Quero!</button>
+									</div>
+								  </div>
+								</div>
+							  </div>
+						</div>
+					</div> <!-- wizard container -->
+				</div>
+			</div><!-- end row -->
+		</div> <!--  big container -->
+	</div>
+
+    <script src="../assets/js/deps.min.js"></script>
+	<script src="../assets/js/app.min.js"></script>
+</body>
+
+</html>
+<script>
+	function upperCaseF(a){
+    setTimeout(function(){
+        a.value = a.value.toUpperCase();
+    }, 1);
+}
+</script>

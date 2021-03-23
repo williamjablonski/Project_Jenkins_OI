@@ -1,0 +1,29 @@
+{
+  "name": "apijenkins",
+  "version": "1.0.0",
+  "description": "",
+  "main": "loader.js",
+  "scripts": {
+    "start": "nodemon -L",
+    "app": "pm2-runtime start loader.js --name backend"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
+    "express-query-int": "^2.0.0",
+    "express-xml-bodyparser": "^0.3.0",
+    "handlebars": "^4.7.6",
+    "jenkins": "^0.28.1",
+    "lodash": "^4.17.5",
+    "mongoose": "^5.11.19",
+    "node-restful": "^0.2.6",
+    "nodemon": "^2.0.7",
+    "replace-in-file": "^6.2.0",
+    "xml-edit": "^1.0.2",
+    "xml-writer": "^1.7.0",
+    "xml2js": "^0.4.23"
+  }
+}
